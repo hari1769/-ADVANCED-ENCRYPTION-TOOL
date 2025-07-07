@@ -1,0 +1,69 @@
+from cryptography.fernet import Fernet
+import os
+
+def generate_key(filename="secret.key"):
+    key = Fernet.generate_key()
+    with open(filename, 'wb') as f:
+        f.write(key)
+    print(f"[+] Key saved to {filename}")
+
+def load_key(filename="secret.key"):
+    with open(filename, 'rb') as f:
+        return f.read()
+
+def encrypt_file(file_path, key):
+    fernet = Fernet(key)
+    with open(file_path, 'rb') as f:
+        data = f.read()
+    encrypted = fernet.encrypt(data)
+    with open(file_path + ".enc", 'wb') as f:
+        f.write(encrypted)
+    print(f"[+] File encrypted: {file_path}.enc")
+
+def decrypt_file(file_path, key):
+    fernet = Fernet(key)
+    with open(file_path, 'rb') as f:
+        data = f.read()
+    decrypted = fernet.decrypt(data)
+    original_name = file_path.replace(".enc", ".dec")
+    with open(original_name, 'wb') as f:
+        f.write(decrypted)
+    print(f"[+] File decrypted: {original_name}")
+
+def main():
+    print("\n=== Advanced Encryption Tool (AES-256) ===")
+    print("1. Generate Key")
+    print("2. Encrypt File")
+    print("3. Decrypt File")
+    print("0. Exit")
+    choice = input("Select an option: ")
+
+    if choice == '1':
+        generate_key()
+
+    elif choice == '2':
+        key_path = input("Enter key file path [default: secret.key]: ") or "secret.key"
+        file_path = input("Enter file to encrypt: ")
+        if os.path.exists(file_path) and os.path.exists(key_path):
+            key = load_key(key_path)
+            encrypt_file(file_path, key)
+        else:
+            print("[-] Invalid file or key path.")
+
+    elif choice == '3':
+        key_path = input("Enter key file path [default: secret.key]: ") or "secret.key"
+        file_path = input("Enter file to decrypt (e.g., file.txt.enc): ")
+        if os.path.exists(file_path) and os.path.exists(key_path):
+            key = load_key(key_path)
+            decrypt_file(file_path, key)
+        else:
+            print("[-] Invalid file or key path.")
+
+    elif choice == '0':
+        print("Exiting...")
+
+    else:
+        print("[-] Invalid choice. Try again.")
+
+if __name__ == "__main__":
+    main()
